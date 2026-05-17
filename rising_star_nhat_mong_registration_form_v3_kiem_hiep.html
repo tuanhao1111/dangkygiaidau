@@ -1,0 +1,240 @@
+<h2 class="sr-only">Form đăng ký giải đấu 3 anh em trên một chiếc xe tăng - Bang Nhất Mộng & đồng minh Rising Star</h2>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Noto+Serif:wght@400;500;700&display=swap">
+
+<style>
+  .rs-wrapper { padding: 1rem 0; font-family: 'Noto Serif', 'Times New Roman', serif; }
+  .rs-banner { background: linear-gradient(135deg, #2C1810 0%, #4A2818 100%); border-radius: var(--border-radius-lg); padding: 1.5rem 1.75rem; margin-bottom: 1.25rem; border: 1px solid #8B5A2B; position: relative; overflow: hidden; }
+  .rs-banner::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #D4AF37, transparent); }
+  .rs-banner::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #D4AF37, transparent); }
+  .rs-title { font-family: 'Ma Shan Zheng', 'ZCOOL XiaoWei', cursive; font-size: 32px; font-weight: 400; margin: 0 0 6px; color: #F4D03F; letter-spacing: 2px; text-align: center; }
+  .rs-subtitle { font-family: 'ZCOOL XiaoWei', serif; font-size: 15px; color: #E8C9A0; margin: 0; text-align: center; letter-spacing: 1px; }
+  .rs-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
+  .rs-meta { background: rgba(212, 175, 55, 0.08); padding: 10px 12px; border-radius: var(--border-radius-md); border: 0.5px solid rgba(212, 175, 55, 0.4); }
+  .rs-meta-label { font-family: 'ZCOOL XiaoWei', serif; font-size: 11px; color: #B8956A; margin: 0 0 3px; letter-spacing: 1px; }
+  .rs-meta-value { font-family: 'ZCOOL XiaoWei', serif; font-size: 14px; font-weight: 400; margin: 0; color: #F4D03F; letter-spacing: 0.5px; }
+  .rs-tabs { display: flex; gap: 4px; margin-bottom: 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .rs-tab { background: transparent; border: none; border-bottom: 2px solid transparent; padding: 10px 18px; font-family: 'ZCOOL XiaoWei', serif; font-size: 16px; color: var(--color-text-secondary); cursor: pointer; letter-spacing: 1px; }
+  .rs-tab.active { color: #993C1D; border-bottom-color: #D85A30; font-weight: 400; }
+  .rs-panel { display: none; }
+  .rs-panel.active { display: block; }
+  .rs-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .rs-field { display: flex; flex-direction: column; gap: 6px; }
+  .rs-label { font-family: 'ZCOOL XiaoWei', serif; font-size: 15px; font-weight: 400; color: var(--color-text-primary); letter-spacing: 0.5px; }
+  .rs-label .req { color: #E24B4A; margin-left: 2px; }
+  .rs-wrapper input, .rs-wrapper select { font-family: 'Noto Serif', serif; font-size: 14px; }
+  .rs-actions { display: flex; gap: 10px; margin-top: 1.25rem; align-items: center; flex-wrap: wrap; }
+  .rs-primary { background: linear-gradient(135deg, #993C1D 0%, #D85A30 100%); color: #FFF8E7; border: 1px solid #712B13; padding: 10px 22px; border-radius: var(--border-radius-md); font-family: 'ZCOOL XiaoWei', serif; font-size: 16px; font-weight: 400; cursor: pointer; letter-spacing: 1px; }
+  .rs-primary:hover { background: linear-gradient(135deg, #712B13 0%, #993C1D 100%); }
+  .rs-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .rs-status { font-family: 'ZCOOL XiaoWei', serif; font-size: 14px; color: var(--color-text-secondary); letter-spacing: 0.5px; }
+  .rs-status.success { color: var(--color-text-success); }
+  .rs-status.error { color: var(--color-text-danger); }
+  .rs-rules { background: var(--color-background-secondary); padding: 14px 16px; border-radius: var(--border-radius-md); margin-top: 1rem; border-left: 3px solid #D4AF37; }
+  .rs-rules h4 { font-family: 'Ma Shan Zheng', cursive; margin: 0 0 10px; font-size: 20px; font-weight: 400; color: #712B13; letter-spacing: 2px; }
+  .rs-rules ul { margin: 0; padding-left: 20px; font-family: 'ZCOOL XiaoWei', serif; font-size: 15px; color: var(--color-text-secondary); line-height: 1.9; letter-spacing: 0.3px; }
+  .rs-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .rs-count { font-family: 'ZCOOL XiaoWei', serif; font-size: 15px; color: var(--color-text-secondary); letter-spacing: 0.5px; }
+  .rs-count strong { color: #712B13; font-weight: 400; font-size: 17px; }
+  .rs-table-wrap { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); overflow: hidden; }
+  table.rs-table { width: 100%; border-collapse: collapse; font-family: 'Noto Serif', serif; font-size: 13px; table-layout: fixed; }
+  .rs-table th { text-align: left; padding: 10px 12px; background: var(--color-background-secondary); font-family: 'ZCOOL XiaoWei', serif; font-weight: 400; font-size: 14px; color: #712B13; letter-spacing: 0.5px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .rs-table td { padding: 10px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rs-table tr:last-child td { border-bottom: none; }
+  .rs-table .col-num { width: 36px; color: var(--color-text-tertiary); font-family: 'ZCOOL XiaoWei', serif; }
+  .rs-empty { padding: 2rem; text-align: center; color: var(--color-text-tertiary); font-family: 'ZCOOL XiaoWei', serif; font-size: 15px; letter-spacing: 0.5px; }
+  .he-pill { display: inline-block; padding: 2px 8px; border-radius: var(--border-radius-md); font-family: 'ZCOOL XiaoWei', serif; font-size: 12px; font-weight: 400; letter-spacing: 0.5px; }
+  .he-tovan { background: #FAECE7; color: #712B13; }
+  .he-thietY { background: #F1EFE8; color: #444441; }
+  .he-culinh { background: #EAF3DE; color: #27500A; }
+  .he-longngam { background: #E6F1FB; color: #0C447C; }
+  .he-thantuong { background: #FAEEDA; color: #633806; }
+  .he-toaimong { background: #EEEDFE; color: #3C3489; }
+  .rs-secondary { background: transparent; color: var(--color-text-primary); border: 0.5px solid var(--color-border-secondary); padding: 8px 16px; border-radius: var(--border-radius-md); font-family: 'ZCOOL XiaoWei', serif; font-size: 14px; cursor: pointer; letter-spacing: 0.5px; }
+  .rs-secondary:hover { background: var(--color-background-secondary); }
+  @media (max-width: 520px) { .rs-form-grid { grid-template-columns: 1fr; } .rs-title { font-size: 26px; } }
+</style>
+
+<div class="rs-wrapper">
+  <div class="rs-banner">
+    <p class="rs-title">三 anh em trên một chiếc xe tăng</p>
+    <p class="rs-subtitle">⚔ Bang Nhất Mộng & đồng minh Rising Star ⚔</p>
+    <div class="rs-meta-grid">
+      <div class="rs-meta"><p class="rs-meta-label">Thể thức</p><p class="rs-meta-value">Vòng loại → BO3</p></div>
+      <div class="rs-meta"><p class="rs-meta-label">Đội hình</p><p class="rs-meta-value">3 vs 3 random</p></div>
+      <div class="rs-meta"><p class="rs-meta-label">Hạn Tố vấn</p><p class="rs-meta-value">Tối đa 2/team</p></div>
+      <div class="rs-meta"><p class="rs-meta-label">Cấm vật</p><p class="rs-meta-value">Vũ khí Thần Binh</p></div>
+    </div>
+  </div>
+
+  <div class="rs-tabs">
+    <button class="rs-tab active" data-tab="register">Đăng ký</button>
+    <button class="rs-tab" data-tab="list">Danh sách <span id="tab-count" style="color: var(--color-text-tertiary);">(0)</span></button>
+  </div>
+
+  <div class="rs-panel active" data-panel="register">
+    <div class="rs-form-grid">
+      <div class="rs-field">
+        <label class="rs-label" for="f-name">Tên người chơi<span class="req">*</span></label>
+        <input type="text" id="f-name" placeholder="Tên nhân vật trong game" maxlength="40" />
+      </div>
+      <div class="rs-field">
+        <label class="rs-label" for="f-id">ID người chơi<span class="req">*</span></label>
+        <input type="text" id="f-id" placeholder="ID nhân vật" maxlength="30" />
+      </div>
+      <div class="rs-field">
+        <label class="rs-label" for="f-he">Hệ phái<span class="req">*</span></label>
+        <select id="f-he">
+          <option value="">-- Chọn hệ phái --</option>
+          <option value="Tố vấn">Tố vấn</option>
+          <option value="Thiết y">Thiết y</option>
+          <option value="Cửu linh">Cửu linh</option>
+          <option value="Long ngâm">Long ngâm</option>
+          <option value="Thần tương">Thần tương</option>
+          <option value="Toái mộng">Toái mộng</option>
+        </select>
+      </div>
+      <div class="rs-field">
+        <label class="rs-label" for="f-discord">ID Discord<span class="req">*</span></label>
+        <input type="text" id="f-discord" placeholder="username hoặc username#1234" maxlength="40" />
+      </div>
+    </div>
+
+    <div class="rs-actions">
+      <button class="rs-primary" id="submit-btn">Ghi danh</button>
+      <button class="rs-secondary" id="export-btn">Xuất Excel</button>
+      <span class="rs-status" id="status"></span>
+    </div>
+
+    <div class="rs-rules">
+      <h4>Thể lệ giải đấu</h4>
+      <ul>
+        <li>Giải đấu <strong>3 vs 3</strong>, BTC random ghép 3 người chơi vào mỗi team</li>
+        <li>Mỗi team có <strong>tối đa 2 Tố vấn</strong></li>
+        <li>Thi đấu <strong>vòng loại</strong>, sau đó vào vòng trong đánh <strong>BO3</strong></li>
+        <li>Cấm sử dụng vũ khí <strong>Thần Binh</strong></li>
+        <li>Mỗi người chỉ ghi danh <strong>một lần</strong> · ID người chơi và Discord không trùng</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="rs-panel" data-panel="list">
+    <div class="rs-list-header">
+      <p class="rs-count">Đã ghi danh: <strong id="reg-count">0</strong> người chơi</p>
+      <button class="rs-secondary" id="export-btn-2">Xuất Excel</button>
+    </div>
+    <div class="rs-table-wrap" id="table-wrap">
+      <div class="rs-empty">Chưa có anh hùng nào ghi danh. Hãy là người đầu tiên!</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+  const STORAGE_KEY = 'rising_star_registrations';
+  const tabs = document.querySelectorAll('.rs-tab');
+  const panels = document.querySelectorAll('.rs-panel');
+  const statusEl = document.getElementById('status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    panels.forEach(p => p.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelector(`[data-panel="${t.dataset.tab}"]`).classList.add('active');
+    if (t.dataset.tab === 'list') renderList();
+  }));
+
+  const heClass = {
+    'Tố vấn': 'he-tovan', 'Thiết y': 'he-thietY', 'Cửu linh': 'he-culinh',
+    'Long ngâm': 'he-longngam', 'Thần tương': 'he-thantuong', 'Toái mộng': 'he-toaimong'
+  };
+
+  function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+  function setStatus(msg, type){ statusEl.textContent = msg; statusEl.className = 'rs-status' + (type ? ' '+type : ''); }
+
+  async function loadAll(){
+    try {
+      const res = await window.storage.list(STORAGE_KEY + ':', true);
+      if (!res || !res.keys || !res.keys.length) return [];
+      const items = [];
+      for (const k of res.keys) {
+        try { const r = await window.storage.get(k, true); if (r && r.value) items.push(JSON.parse(r.value)); } catch(e){}
+      }
+      return items.sort((a,b)=>a.ts - b.ts);
+    } catch(e){ return []; }
+  }
+
+  async function renderList(){
+    const items = await loadAll();
+    document.getElementById('reg-count').textContent = items.length;
+    document.getElementById('tab-count').textContent = `(${items.length})`;
+    const wrap = document.getElementById('table-wrap');
+    if (!items.length) { wrap.innerHTML = '<div class="rs-empty">Chưa có anh hùng nào ghi danh. Hãy là người đầu tiên!</div>'; return; }
+    let html = '<table class="rs-table"><thead><tr><th class="col-num">#</th><th>Tên người chơi</th><th>ID</th><th>Hệ phái</th><th>Discord</th></tr></thead><tbody>';
+    items.forEach((it, i) => {
+      const cls = heClass[it.he] || 'he-thietY';
+      html += `<tr><td class="col-num">${i+1}</td><td>${escapeHtml(it.name)}</td><td>${escapeHtml(it.id)}</td><td><span class="he-pill ${cls}">${escapeHtml(it.he)}</span></td><td>${escapeHtml(it.discord)}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+  async function updateCount(){
+    const items = await loadAll();
+    document.getElementById('reg-count').textContent = items.length;
+    document.getElementById('tab-count').textContent = `(${items.length})`;
+  }
+
+  submitBtn.addEventListener('click', async () => {
+    const name = document.getElementById('f-name').value.trim();
+    const id = document.getElementById('f-id').value.trim();
+    const he = document.getElementById('f-he').value;
+    const discord = document.getElementById('f-discord').value.trim();
+
+    if (!name || !id || !he || !discord) { setStatus('Vui lòng điền đầy đủ thông tin', 'error'); return; }
+
+    const existing = await loadAll();
+    if (existing.some(x => x.id.toLowerCase() === id.toLowerCase())) { setStatus('ID người chơi này đã ghi danh rồi', 'error'); return; }
+    if (existing.some(x => x.discord.toLowerCase() === discord.toLowerCase())) { setStatus('ID Discord này đã ghi danh rồi', 'error'); return; }
+
+    submitBtn.disabled = true;
+    setStatus('Đang gửi...');
+    const ts = Date.now();
+    const entry = { name, id, he, discord, ts };
+    try {
+      const r = await window.storage.set(STORAGE_KEY + ':' + ts + '_' + Math.random().toString(36).slice(2,7), JSON.stringify(entry), true);
+      if (!r) throw new Error('save failed');
+      setStatus('✓ Ghi danh thành công! Chúc anh hùng may mắn', 'success');
+      ['f-name','f-id','f-discord'].forEach(i => document.getElementById(i).value = '');
+      document.getElementById('f-he').value = '';
+      updateCount();
+    } catch(e) { setStatus('Lỗi khi lưu, thử lại sau', 'error'); }
+    submitBtn.disabled = false;
+  });
+
+  async function exportExcel(){
+    const items = await loadAll();
+    if (!items.length) { setStatus('Chưa có dữ liệu để xuất', 'error'); return; }
+    const rows = items.map((it,i)=>({
+      'STT': i+1,
+      'Tên người chơi': it.name,
+      'ID người chơi': it.id,
+      'Hệ phái': it.he,
+      'ID Discord': it.discord,
+      'Thời gian ghi danh': new Date(it.ts).toLocaleString('vi-VN')
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:5},{wch:22},{wch:18},{wch:14},{wch:22},{wch:20}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Ghi danh');
+    XLSX.writeFile(wb, 'NhatMong_RisingStar_3AnhEm_GhiDanh.xlsx');
+    setStatus('✓ Đã xuất file Excel', 'success');
+  }
+  document.getElementById('export-btn').addEventListener('click', exportExcel);
+  document.getElementById('export-btn-2').addEventListener('click', exportExcel);
+
+  updateCount();
+})();
+</script>
