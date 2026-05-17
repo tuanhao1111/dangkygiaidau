@@ -69,7 +69,7 @@ function registerPlayer(data) {
     return { success: false, error: 'Thiếu thông tin' };
   }
 
-  const validHe = ['Tố vấn', 'Thiết y', 'Cửu linh', 'Long ngâm', 'Thần tương', 'Toái mộng'];
+  const validHe = ['Tố vấn', 'Thiết y', 'Cửu linh', 'Long ngâm', 'Thần tương', 'Toái mộng', 'Huyết Hà'];
   if (validHe.indexOf(data.he) === -1) {
     return { success: false, error: 'Hệ phái không hợp lệ' };
   }
