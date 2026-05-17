@@ -13,7 +13,8 @@
     'Cửu linh': 'he-culinh',
     'Long ngâm': 'he-longngam',
     'Thần tương': 'he-thantuong',
-    'Toái mộng': 'he-toaimong'
+    'Toái mộng': 'he-toaimong',
+    'Huyết Hà' :'he-huyetha'
   };
 
   // === TABS ===
