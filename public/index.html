@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tam huynh đệ trên một chiếc xe tăng - Bang Nhất Mộng & Rising Star</title>
+<meta name="description" content="Form đăng ký giải đấu 3 anh em trên một chiếc xe tăng - Bang Nhất Mộng & đồng minh Rising Star">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Noto+Serif:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page-bg"></div>
+
+<div class="container">
+  <div class="banner">
+    <div class="banner-corner tl"></div>
+    <div class="banner-corner tr"></div>
+    <div class="banner-corner bl"></div>
+    <div class="banner-corner br"></div>
+    <h1 class="banner-title">三 anh em trên một chiếc xe tăng</h1>
+    <p class="banner-subtitle">⚔ Bang Nhất Mộng & đồng minh Rising Star ⚔</p>
+    <div class="meta-grid">
+      <div class="meta">
+        <p class="meta-label">Thể thức</p>
+        <p class="meta-value">Vòng loại → BO3</p>
+      </div>
+      <div class="meta">
+        <p class="meta-label">Đội hình</p>
+        <p class="meta-value">3 vs 3 random</p>
+      </div>
+      <div class="meta">
+        <p class="meta-label">Hạn Tố vấn</p>
+        <p class="meta-value">Tối đa 2/team</p>
+      </div>
+      <div class="meta">
+        <p class="meta-label">Cấm vật</p>
+        <p class="meta-value">Vũ khí Thần Binh</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="register">Ghi danh</button>
+    <button class="tab" data-tab="list">Bảng phong thần <span id="tab-count" class="tab-count">(0)</span></button>
+  </div>
+
+  <div class="panel active" data-panel="register">
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="field">
+          <label class="label" for="f-name">Tên người chơi<span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="Tên nhân vật trong game" maxlength="40" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label class="label" for="f-id">ID người chơi<span class="req">*</span></label>
+          <input type="text" id="f-id" placeholder="ID nhân vật" maxlength="30" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label class="label" for="f-he">Hệ phái<span class="req">*</span></label>
+          <select id="f-he">
+            <option value="">-- Chọn hệ phái --</option>
+            <option value="Tố vấn">Tố vấn</option>
+            <option value="Thiết y">Thiết y</option>
+            <option value="Cửu linh">Cửu linh</option>
+            <option value="Long ngâm">Long ngâm</option>
+            <option value="Thần tương">Thần tương</option>
+            <option value="Toái mộng">Toái mộng</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="f-discord">ID Discord<span class="req">*</span></label>
+          <input type="text" id="f-discord" placeholder="username hoặc username#1234" maxlength="40" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="submit-btn">
+          <span class="btn-text">Ghi danh</span>
+        </button>
+        <span class="status" id="status"></span>
+      </div>
+    </div>
+
+    <div class="rules">
+      <h3 class="rules-title">⚜ Thể lệ giải đấu ⚜</h3>
+      <ul>
+        <li>Giải đấu <strong>3 vs 3</strong>, BTC random ghép 3 người chơi vào mỗi team</li>
+        <li>Mỗi team có <strong>tối đa 2 Tố vấn</strong></li>
+        <li>Thi đấu <strong>vòng loại</strong>, sau đó vào vòng trong đánh <strong>BO3</strong></li>
+        <li>Cấm sử dụng vũ khí <strong>Thần Binh</strong></li>
+        <li>Mỗi người chỉ ghi danh <strong>một lần</strong> · ID người chơi và Discord không trùng</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel" data-panel="list">
+    <div class="list-header">
+      <p class="count">Đã ghi danh: <strong id="reg-count">0</strong> anh hùng</p>
+      <button class="secondary" id="refresh-btn">↻ Tải lại</button>
+    </div>
+    <div class="table-wrap" id="table-wrap">
+      <div class="empty">Đang tải bảng phong thần...</div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Bang Nhất Mộng & đồng minh Rising Star · 2026</p>
+  </footer>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

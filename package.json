@@ -1,0 +1,10 @@
+{
+  "name": "rising-star-tournament",
+  "version": "1.0.0",
+  "description": "Form đăng ký giải đấu Bang Nhất Mộng & Rising Star",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve public",
+    "build": "echo 'Static site - no build needed'"
+  }
+}
