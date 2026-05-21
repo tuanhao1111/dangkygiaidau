@@ -1066,27 +1066,51 @@
           clearInterval(whooshInterval);
 
           // Finalize balanced teams algorithm
+          // === PRIORITY RULE ===
+          // Người đăng ký SỚM = ưu tiên cao (vào team trước)
+          // Người đăng ký MUỘN = ưu tiên thấp (bị đẩy xuống bench nếu thiếu chỗ)
+          // Trong cùng nhóm ưu tiên: shuffle ngẫu nhiên để vẫn có yếu tố random
           const allPlayers = JSON.parse(JSON.stringify(cachedPlayers));
-          const toVanPlayers = allPlayers.filter(p => p.he === 'Tố vấn');
-          const otherPlayers = allPlayers.filter(p => p.he !== 'Tố vấn');
+
+          // Sort by registration time ASC (sớm nhất lên đầu)
+          // Nếu không có ts, giữ thứ tự gốc (stable sort)
+          allPlayers.sort((a, b) => {
+            const ta = a.ts ? new Date(a.ts).getTime() : 0;
+            const tb = b.ts ? new Date(b.ts).getTime() : 0;
+            return ta - tb;
+          });
+
+          // Tính số team có thể thành lập
+          const totalTeamsCount = Math.floor(allPlayers.length / 3);
+          const playersNeeded = totalTeamsCount * 3;
+
+          // Tách: người được vào team (ưu tiên cao) vs người bị đẩy xuống bench (đăng ký muộn nhất)
+          const eligiblePlayers = allPlayers.slice(0, playersNeeded);
+          const lateBench = allPlayers.slice(playersNeeded); // Người đăng ký muộn → tự động vào bench
+
+          // Trong nhóm eligible: tách theo hệ phái, shuffle để random hóa việc ghép đội
+          const toVanPlayers = eligiblePlayers.filter(p => p.he === 'Tố vấn');
+          const otherPlayers = eligiblePlayers.filter(p => p.he !== 'Tố vấn');
 
           shuffle(toVanPlayers);
           shuffle(otherPlayers);
 
-          const totalTeamsCount = Math.floor(allPlayers.length / 3);
           const rawTeams = Array.from({ length: totalTeamsCount }, () => []);
-          const bench = [];
+          const bench = [...lateBench]; // Khởi tạo bench với người đăng ký muộn
 
+          // Mỗi team được phép tối đa 1 Tố vấn
           for (let i = 0; i < totalTeamsCount; i++) {
             if (toVanPlayers.length > 0) {
               rawTeams[i].push(toVanPlayers.pop());
             }
           }
 
+          // Tố vấn dư (nếu có) → vào bench
           while (toVanPlayers.length > 0) {
             bench.push(toVanPlayers.pop());
           }
 
+          // Lấp đầy còn lại bằng hệ phái khác
           for (let i = 0; i < totalTeamsCount; i++) {
             while (rawTeams[i].length < 3 && otherPlayers.length > 0) {
               rawTeams[i].push(otherPlayers.pop());
