@@ -1,117 +1,250 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tam huynh đệ trên một chiếc xe tăng - Bang Nhất Mộng & Rising Star</title>
-<meta name="description" content="Form đăng ký giải đấu 3 anh em trên một chiếc xe tăng - Bang Nhất Mộng & Rising Star">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tam huynh đệ trên một chiếc xe tăng - Giải đấu Bang Nhất Mộng & Rising Star</title>
+  <meta name="description" content="Ghi danh giải đấu 3 anh em trên một chiếc xe tăng - Được đồng hành và tài trợ bởi Bang Nhất Mộng & Rising Star.">
+  
+  <!-- Google Fonts: EB Garamond (Cổ điển, hỗ trợ Việt ngữ trọn vẹn) & Outfit (Hiện đại, dễ đọc) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+  <!-- html2canvas Library CDN for exporting teams as image -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-<div class="page-bg"></div>
+  <!-- Dynamic Glowing Background -->
+  <div class="page-bg"></div>
+  <div class="radial-glow"></div>
+  
+  <!-- Dust Particles Canvas -->
+  <canvas id="particles-canvas" class="particles-canvas"></canvas>
 
-<div class="container">
-  <div class="banner">
-    <div class="banner-corner tl"></div>
-    <div class="banner-corner tr"></div>
-    <div class="banner-corner bl"></div>
-    <div class="banner-corner br"></div>
-    <h1 class="banner-title">三 anh em trên một chiếc xe tăng</h1>
-    <p class="banner-subtitle">⚔ Bang Nhất Mộng & Rising Star ⚔</p>
-    <div class="meta-grid">
-      <div class="meta">
-        <p class="meta-label">Thể thức</p>
-        <p class="meta-value">Vòng loại → BO3</p>
-      </div>
-      <div class="meta">
-        <p class="meta-label">Đội hình</p>
-        <p class="meta-value">3 vs 3 random</p>
-      </div>
-      <div class="meta">
-        <p class="meta-label">Giới Hạn Tố vấn</p>
-        <p class="meta-value">Tối đa 1 tố vấn /team</p>
-      </div>
-      <div class="meta">
-        <p class="meta-label">Cấm</p>
-        <p class="meta-value">Vũ khí Thần Binh, Thần Trang</p>
-      </div>
-    </div>
+  <!-- BGM Music Control Panel -->
+  <div class="bgm-control" id="bgm-control">
+    <button class="bgm-btn" id="bgm-toggle-btn" aria-label="Bật/Tắt nhạc nền">
+      <span class="bgm-icon">🎝</span> <span id="bgm-status-text">Bật Nhạc</span>
+    </button>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="register">Ghi danh</button>
-    <button class="tab" data-tab="list">Bảng phong thần <span id="tab-count" class="tab-count">(0)</span></button>
+  <div class="container">
+    <!-- Header Banner -->
+    <header class="app-header">
+      <div class="header-shield">⚔</div>
+      <h1 class="app-title">三 ANH EM TRÊN MỘT CHIẾC XE TĂNG</h1>
+      <p class="app-subtitle">Bang Nhất Mộng & Rising Star Tournament</p>
+    </header>
+
+    <!-- Main Two-Column Layout -->
+    <main class="main-grid">
+      
+      <!-- LEFT COLUMN: Info & Rules -->
+      <section class="info-column">
+        <!-- Hero Visual Banner -->
+        <div class="hero-visual-card">
+          <img src="wuxia_hero_banner.png" alt="Wuxia Tournament Banner" class="hero-banner-img" />
+          <div class="hero-card-overlay"></div>
+          <div class="hero-tag">ĐẠI HỘI VÕ LÂM</div>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-icon">⚔</span>
+            <span class="stat-label">Thể thức</span>
+            <strong class="stat-value">Vòng loại → BO3</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-icon">☲</span>
+            <span class="stat-label">Đội hình</span>
+            <strong class="stat-value">3 vs 3 Random</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-icon">⚜</span>
+            <span class="stat-label">Tố Vấn</span>
+            <strong class="stat-value">Tối đa 1 / team</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-icon">☩</span>
+            <span class="stat-label">Cấm dùng</span>
+            <strong class="stat-value">Thần Binh, Thần Trang</strong>
+          </div>
+        </div>
+
+        <!-- Rules Section -->
+        <div class="rules-card">
+          <h2 class="section-title text-gold">⚜ THỂ LỆ GIẢI ĐẤU ⚜</h2>
+          <ul class="rules-list">
+            <li>Ban tổ chức sẽ bốc thăm <strong>ngẫu nhiên 3 người chơi</strong> để ghép thành một đội hình thi đấu hoàn chỉnh.</li>
+            <li>Để đảm bảo tính cân bằng chiến thuật, mỗi team chỉ được có <strong>tối đa 1 Tố vấn (Thiên vấn)</strong> tham chiến.</li>
+            <li>Các đội sẽ trải qua vòng loại trực tiếp, sau đó tiến vào vòng bảng và thi đấu loại theo thể thức <strong>BO3</strong>.</li>
+            <li><strong>Nghiêm cấm tuyệt đối</strong> việc trang bị các loại vũ khí <strong>Thần Binh</strong> hoặc <strong>Thần Trang</strong> trong suốt quá trình đấu.</li>
+            <li>Mỗi anh hùng chỉ được phép đăng ký <strong>một lần duy nhất</strong>. Hệ thống sẽ tự động lọc trùng ID nhân vật và ID Discord.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: Forms & Interactive Panels -->
+      <section class="interactive-column">
+        <!-- Navigation Tabs -->
+        <nav class="tabs-nav">
+          <button class="tab-btn active" data-tab="register" id="tab-register-btn">
+            <span class="tab-icon">✒</span> Ghi Danh
+          </button>
+          <button class="tab-btn" data-tab="list" id="tab-list-btn">
+            <span class="tab-icon">☱</span> Phong Thần 
+            <span id="tab-count" class="tab-badge">0</span>
+          </button>
+          <button class="tab-btn" data-tab="simulator" id="tab-sim-btn">
+            <span class="tab-icon">☯</span> Giả Lập Lập Đội
+          </button>
+        </nav>
+
+        <!-- PANEL 1: Register Form -->
+        <div class="panel-card active" data-panel="register" id="panel-register">
+          <div class="card-glow-border"></div>
+          <form id="register-form" onsubmit="return false;">
+            <div class="form-instruction">
+              Hãy khai báo danh tính để ban tổ chức xếp đội hình tham chiến!
+            </div>
+            
+            <div class="form-grid">
+              <!-- Player Name -->
+              <div class="input-group">
+                <label for="f-name" class="input-label">Tên người chơi <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <span class="input-icon">✦</span>
+                  <input type="text" id="f-name" placeholder="Tên nhân vật trong game..." maxlength="40" required autocomplete="off" />
+                </div>
+              </div>
+
+              <!-- Player ID -->
+              <div class="input-group">
+                <label for="f-id" class="input-label">ID người chơi <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <span class="input-icon">☩</span>
+                  <input type="text" id="f-id" placeholder="Nhập ID nhân vật..." maxlength="30" required autocomplete="off" />
+                </div>
+              </div>
+
+              <!-- Faction/Class -->
+              <div class="input-group">
+                <label for="f-he" class="input-label">Hệ phái môn phái <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <span class="input-icon">⚜</span>
+                  <select id="f-he" required>
+                    <option value="" disabled selected>-- Chọn hệ phái của bạn --</option>
+                    <option value="Tố vấn">Tố vấn</option>
+                    <option value="Thiết y">Thiết y</option>
+                    <option value="Cửu linh">Cửu linh</option>
+                    <option value="Long ngâm">Long ngâm</option>
+                    <option value="Thần tương">Thần tương</option>
+                    <option value="Toái mộng">Toái mộng</option>
+                    <option value="Huyết Hà">Huyết Hà</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Discord ID -->
+              <div class="input-group">
+                <label for="f-discord" class="input-label">ID Discord <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <span class="input-icon">✎</span>
+                  <input type="text" id="f-discord" placeholder="Ví dụ: username hoặc name#1234" maxlength="40" required autocomplete="off" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Panel -->
+            <div class="submit-area">
+              <button type="submit" class="btn-primary" id="submit-btn">
+                <span class="btn-glow"></span>
+                <span class="btn-content">Ghi Danh Ngay</span>
+              </button>
+              <div class="status-msg" id="status"></div>
+            </div>
+          </form>
+        </div>
+
+        <!-- PANEL 2: Registered List -->
+        <div class="panel-card" data-panel="list" id="panel-list">
+          <div class="card-glow-border"></div>
+          
+          <div class="list-meta">
+            <p class="hero-counter">
+              Đã quy tụ: <strong id="reg-count" class="counter-highlight">0</strong> anh hùng hào kiệt
+            </p>
+            <button class="btn-secondary" id="refresh-btn">
+              <span class="btn-secondary-icon">↻</span> Tải lại bảng
+            </button>
+          </div>
+
+          <!-- Faction Analytics Panel -->
+          <div class="analytics-card" id="analytics-card" style="display: none; margin-bottom: 1.5rem;">
+            <h3 class="analytics-title" style="font-family: var(--font-serif); font-size: 1.05rem; color: var(--text-gold-main); margin-bottom: 0.8rem; letter-spacing: 1px;">⚜ CƠ CẤU MÔN PHÁI QUY TỤ</h3>
+            <div class="faction-bars-grid" id="faction-bars-grid" style="display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.1);">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Quick Search Filter -->
+          <div class="search-wrap" style="margin-bottom: 1.2rem;">
+            <div class="input-wrapper">
+              <span class="input-icon">☯</span>
+              <input type="text" id="search-heroes" placeholder="Lọc nhanh danh hiệu, môn phái hoặc ID..." autocomplete="off" style="padding-left: 36px;">
+            </div>
+          </div>
+
+          <!-- Responsive Table Container -->
+          <div class="table-container" id="table-wrap"></div>
+        </div>
+
+        <!-- PANEL 3: Draft Simulator -->
+        <div class="panel-card" data-panel="simulator" id="panel-simulator">
+          <div class="card-glow-border"></div>
+          
+          <h2 class="section-title text-gold" style="margin-bottom: 0.5rem;">☯ TRẬN PHÁP GIẢ LẬP</h2>
+          <div class="form-instruction" style="margin-bottom: 1.5rem;">
+            Khởi trận bốc thăm ngẫu nhiên tổ đội 3 người dựa trên thực tế (Luật: Tối đa 1 Tố Vấn mỗi đội).
+          </div>
+          
+          <div class="sim-actions" style="display: flex; justify-content: center; gap: 15px; margin-bottom: 1.8rem; flex-wrap: wrap;">
+            <button class="btn-primary" id="btn-sim-draft" style="width: auto; padding: 12px 28px; margin: 0;">
+              <span class="btn-glow"></span>
+              <span class="btn-content">☯ Khai Triển Trận Pháp</span>
+            </button>
+            <button class="btn-secondary btn-utility" id="btn-copy-teams" style="display: none;">
+              <span class="btn-secondary-icon" style="margin-right: 6px; font-weight: bold; color: var(--text-gold-main);">☱</span> Sao Chép Trận Pháp
+            </button>
+            <button class="btn-secondary btn-utility" id="btn-export-png" style="display: none;">
+              <span class="btn-secondary-icon" style="margin-right: 6px; font-weight: bold; color: var(--text-gold-main);">☲</span> Xuất Ảnh Trận Đồ
+            </button>
+          </div>
+          
+          <div class="table-container" id="sim-result-wrap" style="max-height: 520px; background: transparent; border: none; box-shadow: none;">
+            <div class="empty-list" style="padding: 3rem 1.5rem;">
+              <span class="stat-icon" style="font-size: 2.5rem; margin-bottom: 10px;">☯</span>
+              <span>Chưa khai triển trận pháp bốc thăm đội hình. Hãy nhấn nút để bắt đầu!</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p class="footer-design">Giao diện Thiết kế Cao cấp &copy; 2026</p>
+      <p class="footer-guild">Đồng tổ chức bởi Bang Nhất Mộng & Rising Star</p>
+    </footer>
   </div>
 
-  <div class="panel active" data-panel="register">
-    <div class="form-card">
-      <div class="form-grid">
-        <div class="field">
-          <label class="label" for="f-name">Tên người chơi<span class="req">*</span></label>
-          <input type="text" id="f-name" placeholder="Tên nhân vật trong game" maxlength="40" autocomplete="off" />
-        </div>
-        <div class="field">
-          <label class="label" for="f-id">ID người chơi<span class="req">*</span></label>
-          <input type="text" id="f-id" placeholder="ID nhân vật" maxlength="30" autocomplete="off" />
-        </div>
-        <div class="field">
-          <label class="label" for="f-he">Hệ phái<span class="req">*</span></label>
-          <select id="f-he">
-            <option value="">-- Chọn hệ phái --</option>
-            <option value="Tố vấn">Tố vấn</option>
-            <option value="Thiết y">Thiết y</option>
-            <option value="Cửu linh">Cửu linh</option>
-            <option value="Long ngâm">Long ngâm</option>
-            <option value="Thần tương">Thần tương</option>
-            <option value="Toái mộng">Toái mộng</option>
-            <option value="Huyết Hà">Huyết Hà</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="label" for="f-discord">ID Discord<span class="req">*</span></label>
-          <input type="text" id="f-discord" placeholder="username hoặc username#1234" maxlength="40" autocomplete="off" />
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="primary" id="submit-btn">
-          <span class="btn-text">Ghi danh</span>
-        </button>
-        <span class="status" id="status"></span>
-      </div>
-    </div>
-
-    <div class="rules">
-      <h3 class="rules-title">⚜ Thể lệ giải đấu ⚜</h3>
-      <ul>
-        <li>Giải đấu <strong>3 vs 3</strong>, BTC random ghép 3 người chơi vào mỗi team</li>
-        <li>Mỗi team có <strong>tối đa 1 Tố vấn ( Thiên vấn )</strong></li>
-        <li>Thi đấu <strong>vòng loại -</strong> <strong>vòng bảng</strong> <strong>- BO3</strong></li>
-        <li>Cấm sử dụng vũ khí <strong>Thần Binh, Thần Trang</strong></li>
-        <li>Mỗi người chỉ ghi danh <strong>một lần</strong> · ID người chơi và Discord không trùng</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="panel" data-panel="list">
-    <div class="list-header">
-      <p class="count">Đã ghi danh: <strong id="reg-count">0</strong> anh hùng</p>
-      <button class="secondary" id="refresh-btn">↻ Tải lại</button>
-    </div>
-    <div class="table-wrap" id="table-wrap">
-      <div class="empty">Đang tải bảng phong thần...</div>
-    </div>
-  </div>
-
-  <footer class="footer">
-    <p>Bang Nhất Mộng & Rising Star · 2026</p>
-  </footer>
-</div>
-
-<script src="config.js"></script>
-<script src="app.js"></script>
+  <!-- Script links -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
