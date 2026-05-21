@@ -1428,7 +1428,7 @@ tbody tr:hover td:first-child {
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
-  height: 260px;
+  height: 320px;
   transform: none !important;
   animation: none !important;
   opacity: 1 !important;
@@ -1471,6 +1471,24 @@ tbody tr:hover td:first-child {
   justify-content: center;
   transform: rotateY(0deg);
   z-index: 2;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card-back:hover {
+  border-color: var(--text-gold-bright);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+  transform: scale(1.02);
+}
+
+.team-card-back:hover .card-back-pattern {
+  color: var(--text-gold-bright);
+  text-shadow: 0 0 25px rgba(255, 215, 0, 0.95);
+  animation-duration: 4s;
+}
+
+.team-card-back:active {
+  transform: scale(0.98);
 }
 
 .card-back-pattern {
@@ -1480,6 +1498,7 @@ tbody tr:hover td:first-child {
   margin-bottom: 0.5rem;
   animation: spinBagua 8s linear infinite;
   user-select: none;
+  transition: all 0.3s ease;
 }
 
 .card-back-text {
@@ -1497,6 +1516,86 @@ tbody tr:hover td:first-child {
   -webkit-backdrop-filter: blur(12px);
   transform: rotateY(180deg);
   z-index: 1;
+}
+
+/* Khung điều khiển Triệu Tập của đội hình */
+.team-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 16px 12px;
+  margin-top: auto;
+  position: relative;
+  z-index: 5;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.btn-roll-team {
+  background: linear-gradient(135deg, #3a1b0e 0%, #150905 100%);
+  border: 1px solid var(--border-gold-dim);
+  color: var(--text-gold-light);
+  font-family: var(--font-serif);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.btn-roll-icon {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-roll-team::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.15), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-roll-team:hover::before {
+  left: 100%;
+}
+
+.btn-roll-team:hover:not(:disabled) {
+  border-color: var(--border-gold-bright);
+  color: var(--text-gold-bright);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-roll-team:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-roll-team:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-color: rgba(212, 175, 55, 0.2);
+  color: var(--text-muted);
+  box-shadow: none;
 }
 
 /* Suspense Reveal Preparing Effects */
@@ -1692,7 +1791,7 @@ tbody tr:hover td:first-child {
 .capturing .team-card {
   perspective: none !important;
   height: auto !important;
-  min-height: 260px !important;
+  min-height: 320px !important;
   transform: none !important;
   animation: none !important;
   box-shadow: none !important;
@@ -1723,6 +1822,139 @@ tbody tr:hover td:first-child {
 .capturing .team-member {
   background: rgba(11, 7, 5, 0.75) !important;
   border: 1px solid rgba(212, 175, 55, 0.15) !important;
+}
+
+.capturing .team-actions {
+  display: none !important;
+}
+
+/* ==========================================================================
+   GACHA SHUFFLER ROLL & HE-PILL PULSE EFFECTS
+   ========================================================================== */
+
+/* Trạng thái slot thành viên chờ quay */
+.team-member.waiting {
+  opacity: 0.55;
+  border-color: rgba(212, 175, 55, 0.08) !important;
+}
+
+.team-member.waiting .member-name {
+  color: var(--text-muted) !important;
+  font-style: italic;
+}
+
+/* Slot thành viên đang quay gacha */
+.team-member.rolling {
+  background: rgba(20, 13, 10, 0.85) !important;
+  border-color: var(--text-gold-main) !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+  animation: rollingPulse 0.12s ease-in-out infinite alternate;
+}
+
+.team-member.rolling .member-name {
+  color: var(--text-gold-light) !important;
+  font-weight: 700;
+  transform: skewX(-4deg);
+  opacity: 0.8;
+  filter: blur(0.3px);
+}
+
+.team-member.rolling .member-id {
+  opacity: 0.5;
+}
+
+@keyframes rollingPulse {
+  0% { box-shadow: 0 0 4px rgba(212, 175, 55, 0.15); }
+  100% { box-shadow: 0 0 12px rgba(212, 175, 55, 0.4); }
+}
+
+/* Vòng xoay bát quái mini trong slot */
+.slot-loading-icon {
+  display: inline-block;
+  animation: spinBagua 1s linear infinite;
+  color: var(--text-gold-main);
+  font-size: 0.85rem;
+}
+
+/* Hiệu ứng chớp hào quang bừng sáng khi hé lộ (dành riêng cho từng hệ phái) */
+@keyframes revealFlashTovan {
+  0% { box-shadow: 0 0 0px rgba(255, 105, 180, 0); border-color: rgba(255, 105, 180, 0.3); background: rgba(255, 105, 180, 0.15); }
+  30% { box-shadow: 0 0 25px rgba(255, 105, 180, 0.95); border-color: #ff69b4; background: rgba(255, 105, 180, 0.35); }
+  100% { box-shadow: 0 0 8px rgba(255, 105, 180, 0.2); border-color: rgba(255, 105, 180, 0.25); background: rgba(11, 7, 5, 0.45); }
+}
+@keyframes revealFlashThietY {
+  0% { box-shadow: 0 0 0px rgba(255, 215, 0, 0); border-color: rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.15); }
+  30% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.95); border-color: #ffd700; background: rgba(255, 215, 0, 0.35); }
+  100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 0.25); background: rgba(11, 7, 5, 0.45); }
+}
+@keyframes revealFlashCulinh {
+  0% { box-shadow: 0 0 0px rgba(186, 85, 211, 0); border-color: rgba(186, 85, 211, 0.3); background: rgba(186, 85, 211, 0.15); }
+  30% { box-shadow: 0 0 25px rgba(186, 85, 211, 0.95); border-color: #ba55d3; background: rgba(186, 85, 211, 0.35); }
+  100% { box-shadow: 0 0 8px rgba(186, 85, 211, 0.2); border-color: rgba(186, 85, 211, 0.25); background: rgba(11, 7, 5, 0.45); }
+}
+@keyframes revealFlashLongngam {
+  0% { box-shadow: 0 0 0px rgba(46, 204, 113, 0); border-color: rgba(46, 204, 113, 0.3); background: rgba(46, 204, 113, 0.15); }
+  30% { box-shadow: 0 0 25px rgba(46, 204, 113, 0.95); border-color: #2ecc71; background: rgba(46, 204, 113, 0.35); }
+  100% { box-shadow: 0 0 8px rgba(46, 204, 113, 0.2); border-color: rgba(46, 204, 113, 0.25); background: rgba(11, 7, 5, 0.45); }
+}
+@keyframes revealFlashThantuong {
+  0% { box-shadow: 0 0 0px rgba(0, 191, 255, 0); border-color: rgba(0, 191, 255, 0.3); background: rgba(0, 191, 255, 0.15); }
+  30% { box-shadow: 0 0 25px rgba(0, 191, 255, 0.95); border-color: #00bfff; background: rgba(0, 191, 255, 0.35); }
+  100% { box-shadow: 0 0 8px rgba(0, 191, 255, 0.2); border-color: rgba(0, 191, 255, 0.25); background: rgba(11, 7, 5, 0.45); }
+}
+@keyframes revealFlashToaimong {
+  0% { box-shadow: 0 0 0px rgba(30, 144, 255, 0); border-color: rgba(30, 144, 255, 0.3); background: rgba(30, 144, 255, 0.15); }
+  30% { box-shadow: 0 0 25px rgba(30, 144, 255, 0.95); border-color: #1e90ff; background: rgba(30, 144, 255, 0.35); }
+  100% { box-shadow: 0 0 8px rgba(30, 144, 255, 0.2); border-color: rgba(30, 144, 255, 0.25); background: rgba(11, 7, 5, 0.45); }
+}
+@keyframes revealFlashHuyetha {
+  0% { box-shadow: 0 0 0px rgba(255, 51, 51, 0); border-color: rgba(255, 51, 51, 0.3); background: rgba(255, 51, 51, 0.15); }
+  30% { box-shadow: 0 0 25px rgba(255, 51, 51, 0.95); border-color: #ff3333; background: rgba(255, 51, 51, 0.35); }
+  100% { box-shadow: 0 0 8px rgba(255, 51, 51, 0.2); border-color: rgba(255, 51, 51, 0.25); background: rgba(11, 7, 5, 0.45); }
+}
+
+.team-member.revealed {
+  opacity: 1 !important;
+}
+
+.team-member.revealed.he-tovan-rev {
+  animation: revealFlashTovan 1.2s ease-out forwards;
+}
+.team-member.revealed.he-thietY-rev {
+  animation: revealFlashThietY 1.2s ease-out forwards;
+}
+.team-member.revealed.he-culinh-rev {
+  animation: revealFlashCulinh 1.2s ease-out forwards;
+}
+.team-member.revealed.he-longngam-rev {
+  animation: revealFlashLongngam 1.2s ease-out forwards;
+}
+.team-member.revealed.he-thantuong-rev {
+  animation: revealFlashThantuong 1.2s ease-out forwards;
+}
+.team-member.revealed.he-toaimong-rev {
+  animation: revealFlashToaimong 1.2s ease-out forwards;
+}
+.team-member.revealed.he-huyetha-rev {
+  animation: revealFlashHuyetha 1.2s ease-out forwards;
+}
+
+/* Hào quang rực rỡ bao trùm cả đội khi lật xong hoàn chỉnh */
+.team-card.team-completed .team-card-front {
+  border-color: var(--text-gold-bright) !important;
+  box-shadow: 0 0 22px rgba(255, 215, 0, 0.35), 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+  transition: border-color 0.8s ease, box-shadow 0.8s ease;
+}
+
+/* Reset hoàn toàn hiệu ứng gacha và chờ quay khi xuất ảnh PNG bằng html2canvas */
+.capturing .team-member.waiting,
+.capturing .team-member.rolling,
+.capturing .team-member.revealed {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 

@@ -209,6 +209,29 @@
       noise.start(t);
       noise.stop(t + duration);
     }
+
+    static playTick() {
+      this.init();
+      if (!this.ctx || this.ctx.state === 'suspended') return;
+      const t = this.ctx.currentTime;
+      
+      // A crisp mechanical click using an exponential frequency sweep
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1400, t);
+      osc.frequency.exponentialRampToValueAtTime(350, t + 0.035);
+      
+      gain.gain.setValueAtTime(0.05, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+      
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      
+      osc.start(t);
+      osc.stop(t + 0.04);
+    }
   }
 
   // === BACKGROUND MUSIC CONTROL ===
@@ -740,6 +763,153 @@
       return array;
     }
 
+    // State tracking for interactive bốc thăm
+    let isCardFlipped = [];
+    let isTeamRolling = [];
+    let isTeamCompleted = [];
+    let activeRollingTeamIndex = null;
+
+    // Expose click handlers to global window object so inline event handlers work flawlessly
+    window.flipCard = async function(tIndex) {
+      if (activeRollingTeamIndex !== null) return; // Khóa nếu đang có đội quay gacha
+      if (isCardFlipped[tIndex]) return; // Đã lật rồi
+      
+      isCardFlipped[tIndex] = true;
+      const cardEl = document.getElementById(`team-card-${tIndex}`);
+      if (!cardEl) return;
+      
+      // 1. Hiệu ứng lắc thẻ (vận chân khí)
+      cardEl.classList.add('preparing-reveal');
+      WuxiaSound.playWhoosh();
+      
+      await new Promise(resolve => setTimeout(resolve, 900));
+      
+      // 2. Lật thẻ 3D ra mặt trước
+      cardEl.classList.remove('preparing-reveal');
+      cardEl.classList.add('flipped');
+      WuxiaSound.playDrum();
+      WuxiaSound.playClash();
+    };
+
+    window.rollTeamMembers = async function(tIndex) {
+      if (activeRollingTeamIndex !== null) return; // Chỉ quay gacha mỗi lần 1 đội
+      if (isTeamRolling[tIndex] || isTeamCompleted[tIndex]) return;
+      if (!isCardFlipped[tIndex]) return; // Chưa lật thẻ thì không cho quay
+      
+      isTeamRolling[tIndex] = true;
+      activeRollingTeamIndex = tIndex;
+      
+      // Khóa tất cả các nút Triệu Tập khác và nút Trận Pháp chính
+      document.querySelectorAll('.btn-roll-team').forEach(btn => btn.disabled = true);
+      if (simDraftBtn) {
+        simDraftBtn.disabled = true;
+        simDraftBtn.innerHTML = `<span class="btn-glow"></span><span class="btn-content"><span class="spinner-mini"></span> Đang Triệu Tập...</span>`;
+      }
+      
+      const rollBtn = document.getElementById(`btn-roll-team-${tIndex}`);
+      if (rollBtn) {
+        rollBtn.disabled = true;
+        rollBtn.innerHTML = `<span class="spinner-mini"></span> Đang Quay...`;
+      }
+      
+      const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+      
+      // Quay gacha cho từng thành viên một
+      for (let m = 0; m < 3; m++) {
+        const slotEl = document.getElementById(`member-slot-${tIndex}-${m}`);
+        if (slotEl) {
+          slotEl.classList.remove('waiting');
+          slotEl.classList.add('rolling');
+          
+          const realName = slotEl.getAttribute('data-real-name');
+          const realId = slotEl.getAttribute('data-real-id');
+          const realHe = slotEl.getAttribute('data-real-he');
+          const realClass = slotEl.getAttribute('data-real-class');
+          const realRevClass = slotEl.getAttribute('data-real-rev-class');
+          
+          // Nhịp độ quay chậm dần đều 22 bước cực kỳ mượt mà
+          const steps = [
+            50, 50, 50, 50, 52, 55, 60, 68, 78, 90, 105, 125, 150, 180, 215, 255, 305, 365, 435, 520, 620, 750
+          ];
+          
+          for (let s = 0; s < steps.length; s++) {
+            const tempPlayer = cachedPlayers[Math.floor(Math.random() * cachedPlayers.length)];
+            
+            slotEl.querySelector('.member-name').textContent = tempPlayer.name;
+            slotEl.querySelector('.member-id').textContent = 'ID: ' + tempPlayer.id;
+            const pillEl = slotEl.querySelector('.he-pill');
+            pillEl.className = 'he-pill waiting-pill';
+            pillEl.textContent = tempPlayer.he;
+            
+            WuxiaSound.playTick();
+            await delay(steps[s]);
+          }
+          
+          // Dừng và cập nhật thông tin thật, nổ hào quang môn phái
+          slotEl.classList.remove('rolling');
+          slotEl.classList.add('revealed', realRevClass);
+          
+          slotEl.querySelector('.member-name').textContent = realName;
+          slotEl.querySelector('.member-id').textContent = 'ID: ' + realId;
+          const pillEl = slotEl.querySelector('.he-pill');
+          pillEl.className = `he-pill ${realClass}`;
+          pillEl.textContent = realHe;
+          
+          WuxiaSound.playClash();
+          WuxiaSound.playDrum();
+          
+          await delay(600);
+        }
+      }
+      
+      // Đội hình hoàn tất
+      isTeamRolling[tIndex] = false;
+      isTeamCompleted[tIndex] = true;
+      activeRollingTeamIndex = null;
+      
+      const cardEl = document.getElementById(`team-card-${tIndex}`);
+      if (cardEl) {
+        cardEl.classList.add('team-completed');
+        WuxiaSound.playBell();
+      }
+      
+      // Ẩn vùng nút bấm thao tác cực kỳ mượt mà
+      const actionsEl = document.getElementById(`team-actions-${tIndex}`);
+      if (actionsEl) {
+        actionsEl.style.opacity = '0';
+        actionsEl.style.transform = 'scale(0.9) translateY(10px)';
+        setTimeout(() => actionsEl.remove(), 500);
+      }
+      
+      // Kiểm tra xem tất cả các đội đã quay hoàn thành chưa
+      const allDone = isTeamCompleted.every(v => v === true);
+      if (allDone) {
+        // Tự động mở danh sách dự bị (bench)
+        const benchEl = document.getElementById('bench-capture-area');
+        if (benchEl) {
+          benchEl.style.opacity = '1';
+          benchEl.style.transform = 'scale(1) translateY(0)';
+          benchEl.style.pointerEvents = 'auto';
+          WuxiaSound.playBell();
+          await delay(600);
+        }
+        
+        // Mở khóa lại nút Trận Pháp chính
+        if (simDraftBtn) {
+          simDraftBtn.disabled = false;
+          simDraftBtn.innerHTML = originalBtnContent;
+        }
+      } else {
+        // Mở khóa lại nút Triệu Tập cho các đội đã lật nhưng chưa được quay
+        isTeamCompleted.forEach((completed, idx) => {
+          if (!completed && isCardFlipped[idx]) {
+            const btn = document.getElementById(`btn-roll-team-${idx}`);
+            if (btn) btn.disabled = false;
+          }
+        });
+      }
+    };
+
     // Function to render team cards from state (supports F5 reload)
     function renderSimResults(teams, bench, triggerFlipEffect) {
       if (!teams.length && !bench.length) {
@@ -756,16 +926,25 @@
       copyBtn.style.display = 'block';
       exportBtn.style.display = 'block';
 
+      // Khởi tạo các mảng theo dõi trạng thái nếu đây là đợt bốc thăm mới hoàn toàn
+      if (triggerFlipEffect) {
+        isCardFlipped = Array(teams.length).fill(false);
+        isTeamRolling = Array(teams.length).fill(false);
+        isTeamCompleted = Array(teams.length).fill(false);
+        activeRollingTeamIndex = null;
+      }
+
       let html = '';
       if (teams.length > 0) {
         html += `<div class="teams-grid" id="teams-capture-area">`;
         
         teams.forEach((team, tIndex) => {
+          const cardCls = triggerFlipEffect ? 'team-card' : 'team-card flipped team-completed';
           html += `
-            <div class="team-card" id="team-card-${tIndex}">
+            <div class="${cardCls}" id="team-card-${tIndex}">
               <div class="team-card-inner">
                 <!-- Card Back Face -->
-                <div class="team-card-back">
+                <div class="team-card-back" onclick="window.flipCard(${tIndex})">
                   <div class="card-back-pattern">☯</div>
                   <div class="card-back-text">TRẬN ĐỒ ${tIndex + 1}</div>
                 </div>
@@ -777,20 +956,47 @@
                   </div>
                   <div class="team-members">`;
                   
-          team.members.forEach(member => {
+          team.members.forEach((member, mIndex) => {
             const cls = heClass[member.he] || 'he-thietY';
-            html += `
-              <div class="team-member">
-                <div class="member-info">
-                  <span class="member-name">${escapeHtml(member.name)}</span>
-                  <span class="member-id">ID: ${escapeHtml(member.id)}</span>
-                </div>
-                <span class="he-pill ${cls}" style="font-size: 0.65rem; padding: 2px 6px;">${escapeHtml(member.he)}</span>
-              </div>`;
+            const heClassRev = cls + '-rev';
+            if (triggerFlipEffect) {
+              html += `
+                <div class="team-member waiting" id="member-slot-${tIndex}-${mIndex}" 
+                  data-real-name="${escapeHtml(member.name)}" 
+                  data-real-id="${escapeHtml(member.id)}" 
+                  data-real-he="${escapeHtml(member.he)}" 
+                  data-real-class="${cls}"
+                  data-real-rev-class="${heClassRev}">
+                  <div class="member-info">
+                    <span class="member-name">☯ Triệu tập...</span>
+                    <span class="member-id">ID: -----</span>
+                  </div>
+                  <span class="he-pill waiting-pill" style="font-size: 0.65rem; padding: 2px 6px; background: rgba(212,175,55,0.05); color: var(--text-muted); border-color: rgba(212,175,55,0.1);">☱ Chờ</span>
+                </div>`;
+            } else {
+              html += `
+                <div class="team-member revealed ${heClassRev}" id="member-slot-${tIndex}-${mIndex}">
+                  <div class="member-info">
+                    <span class="member-name">${escapeHtml(member.name)}</span>
+                    <span class="member-id">ID: ${escapeHtml(member.id)}</span>
+                  </div>
+                  <span class="he-pill ${cls}" style="font-size: 0.65rem; padding: 2px 6px;">${escapeHtml(member.he)}</span>
+                </div>`;
+            }
           });
           
           html += `
-                  </div>
+                  </div>`;
+          
+          // Chỉ hiển thị nút Triệu Tập Hào Kiệt ở chế độ lật động mới
+          if (triggerFlipEffect) {
+            html += `
+                  <div class="team-actions" id="team-actions-${tIndex}">
+                    <button class="btn-roll-team" id="btn-roll-team-${tIndex}" onclick="window.rollTeamMembers(${tIndex})"><span class="btn-roll-icon">☯</span>Triệu Tập Hào Kiệt</button>
+                  </div>`;
+          }
+
+          html += `
                 </div>
               </div>
             </div>`;
@@ -807,7 +1013,6 @@
 
       // Bench rendering
       if (bench.length > 0) {
-        // If triggerFlipEffect is active, render the bench container hidden initially to fade in later
         const benchStyle = triggerFlipEffect 
           ? 'margin-top: 2rem; opacity: 0; transform: scale(0.96) translateY(15px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); animation: none; pointer-events: none;'
           : 'margin-top: 2rem;';
@@ -835,58 +1040,17 @@
       // Re-trigger Card Glow for dynamic components
       setTimeout(initCardGlow, 50);
 
-      // Perform staggered 3D Flip effect or Suspense Reveal Sequence
+      // Nếu là chạy mới hoàn toàn: giữ nguyên trạng thái khóa nút chính Trận Pháp để đợi lật/quay xong
       if (triggerFlipEffect && teams.length > 0) {
-        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-        
-        async function runRevealSequence() {
-          // Disable button and set status
-          if (simDraftBtn) {
-            simDraftBtn.disabled = true;
-            simDraftBtn.innerHTML = `<span class="btn-glow"></span><span class="btn-content"><span class="spinner-mini"></span> Đang Hé Lộ...</span>`;
-          }
-
-          for (let i = 0; i < teams.length; i++) {
-            const cardEl = document.getElementById(`team-card-${i}`);
-            if (cardEl) {
-              // 1. Shake/Aura phase (Vận chân khí)
-              cardEl.classList.add('preparing-reveal');
-              WuxiaSound.playWhoosh();
-              
-              await delay(800);
-              
-              // 2. Flip phase (Khai mở)
-              cardEl.classList.remove('preparing-reveal');
-              cardEl.classList.add('flipped');
-              WuxiaSound.playDrum();
-              WuxiaSound.playClash();
-              
-              // Digesting delay
-              await delay(1000);
-            }
-          }
-
-          // 3. Reveal bench smoothly
-          const benchEl = document.getElementById('bench-capture-area');
-          if (benchEl) {
-            benchEl.style.opacity = '1';
-            benchEl.style.transform = 'scale(1) translateY(0)';
-            benchEl.style.pointerEvents = 'auto';
-            WuxiaSound.playBell();
-            await delay(600);
-          }
-
-          // 4. Re-enable button
-          if (simDraftBtn) {
-            simDraftBtn.disabled = false;
-            simDraftBtn.innerHTML = originalBtnContent;
-          }
+        if (simDraftBtn) {
+          simDraftBtn.disabled = true;
+          simDraftBtn.innerHTML = `<span class="btn-glow"></span><span class="btn-content"><span class="spinner-mini"></span> Khai Triển Trận Pháp</span>`;
         }
-
-        runRevealSequence();
       } else {
-        // Immediately flip all cards if rendering saved history
-        document.querySelectorAll('.team-card').forEach(card => card.classList.add('flipped'));
+        // Nếu tải từ lịch sử: Lật mở tất cả thẻ ngay lập tức
+        document.querySelectorAll('.team-card').forEach(card => {
+          card.classList.add('flipped', 'team-completed');
+        });
       }
     }
 
