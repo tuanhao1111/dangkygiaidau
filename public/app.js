@@ -1487,18 +1487,45 @@
       });
     }
 
-    // Load saved historical results immediately on page launch
-    const savedResults = localStorage.getItem('dangkygiaidau_sim_results');
-    if (savedResults) {
+    // Load kết quả random gần nhất từ Google Sheet (mọi người đều thấy)
+    async function loadLatestTeamsFromSheet() {
+      if (!isConfigured()) return false;
       try {
-        const parsed = JSON.parse(savedResults);
-        if (parsed && (parsed.teams || parsed.bench)) {
-          renderSimResults(parsed.teams || [], parsed.bench || [], false);
+        const res = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=list_results');
+        const data = await res.json();
+        if (!data.success || !data.sessions || !data.sessions.length) return false;
+
+        // Lấy session có sessionNum lớn nhất (lượt random mới nhất)
+        const latest = data.sessions.reduce((max, s) =>
+          (Number(s.sessionNum) > Number(max.sessionNum) ? s : max), data.sessions[0]);
+
+        if (latest && (latest.teams || latest.bench)) {
+          renderSimResults(latest.teams || [], latest.bench || [], false);
+          return true;
         }
+        return false;
       } catch (err) {
-        console.error("History parse fail: ", err);
+        console.error("Load latest teams fail: ", err);
+        return false;
       }
     }
+
+    // Ưu tiên load từ Sheet trước, fallback về localStorage nếu Sheet không có
+    loadLatestTeamsFromSheet().then(loadedFromSheet => {
+      if (loadedFromSheet) return;
+      // Fallback: load saved historical results from localStorage
+      const savedResults = localStorage.getItem('dangkygiaidau_sim_results');
+      if (savedResults) {
+        try {
+          const parsed = JSON.parse(savedResults);
+          if (parsed && (parsed.teams || parsed.bench)) {
+            renderSimResults(parsed.teams || [], parsed.bench || [], false);
+          }
+        } catch (err) {
+          console.error("History parse fail: ", err);
+        }
+      }
+    });
   }
 
   // ============================================================
