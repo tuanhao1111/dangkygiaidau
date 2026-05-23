@@ -14,6 +14,154 @@
   <link rel="stylesheet" href="styles.css">
   <!-- html2canvas Library CDN for exporting teams as image -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Inline CSS bổ sung cho chức năng khóa đăng ký -->
+  <style>
+    .lock-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, rgba(139, 0, 0, 0.25), rgba(90, 0, 0, 0.35));
+      border: 1px solid #c9302c;
+      border-radius: 8px;
+      box-shadow: 0 0 16px rgba(201, 48, 44, 0.35), inset 0 0 12px rgba(0,0,0,0.4);
+    }
+    .lock-banner-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 6px rgba(244, 208, 63, 0.6));
+    }
+    .lock-banner-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: #f4d03f;
+    }
+    .lock-banner-text strong {
+      font-size: 1.05rem;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+    .lock-banner-text small {
+      font-size: 0.85rem;
+      color: #d4b896;
+      opacity: 0.9;
+    }
+
+    /* Form bị khóa: làm mờ */
+    #register-form.form-locked {
+      opacity: 0.45;
+      pointer-events: none;
+      filter: grayscale(0.4);
+    }
+
+    /* Nút khóa khi đã khóa: đổi sang xanh "Mở lại" */
+    #btn-lock-registration.is-unlocked-mode {
+      background: linear-gradient(135deg, #0d6e3a, #054520) !important;
+      border-color: #2e8b57 !important;
+    }
+
+    /* Modal nhập code admin */
+    .admin-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 7, 5, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeInBg 0.2s ease-out;
+    }
+    .admin-modal-backdrop.show { display: flex; }
+    .admin-modal {
+      background: linear-gradient(160deg, #1f1410, #0e0907);
+      border: 1px solid #8b6914;
+      border-radius: 10px;
+      padding: 28px 26px;
+      max-width: 380px;
+      width: 90%;
+      box-shadow: 0 0 32px rgba(244, 208, 63, 0.25), inset 0 0 18px rgba(0,0,0,0.5);
+      animation: modalSlideIn 0.25s ease-out;
+    }
+    .admin-modal h3 {
+      color: #f4d03f;
+      margin: 0 0 8px 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.04em;
+    }
+    .admin-modal p {
+      color: #d4b896;
+      font-size: 0.88rem;
+      margin: 0 0 16px 0;
+      opacity: 0.9;
+    }
+    .admin-modal input {
+      width: 100%;
+      padding: 11px 14px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid #6b5a2c;
+      border-radius: 6px;
+      color: #f4d03f;
+      font-size: 1rem;
+      font-family: inherit;
+      letter-spacing: 0.05em;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .admin-modal input:focus {
+      border-color: #f4d03f;
+      box-shadow: 0 0 10px rgba(244, 208, 63, 0.3);
+    }
+    .admin-modal-msg {
+      min-height: 20px;
+      font-size: 0.85rem;
+      color: #ff6b6b;
+      margin-top: 8px;
+    }
+    .admin-modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      justify-content: flex-end;
+    }
+    .admin-modal-actions button {
+      padding: 9px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      border: 1px solid #6b5a2c;
+      background: rgba(0,0,0,0.35);
+      color: #d4b896;
+      transition: all 0.2s;
+    }
+    .admin-modal-actions button:hover {
+      background: rgba(244, 208, 63, 0.1);
+      border-color: #f4d03f;
+      color: #f4d03f;
+    }
+    .admin-modal-actions button.btn-confirm {
+      background: linear-gradient(135deg, #8b0000, #5a0000);
+      border-color: #c9302c;
+      color: #f4d03f;
+    }
+    .admin-modal-actions button.btn-confirm:hover {
+      background: linear-gradient(135deg, #a00000, #6a0000);
+    }
+
+    @keyframes fadeInBg {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
   <!-- Dynamic Glowing Background -->
@@ -106,6 +254,16 @@
         <!-- PANEL 1: Register Form -->
         <div class="panel-card active" data-panel="register" id="panel-register">
           <div class="card-glow-border"></div>
+
+          <!-- Banner khi đã kết thúc đăng ký -->
+          <div id="lock-banner" class="lock-banner" style="display:none;">
+            <span class="lock-banner-icon">🔒</span>
+            <div class="lock-banner-text">
+              <strong>ĐÃ KẾT THÚC GHI DANH</strong>
+              <small>Ban tổ chức đã đóng cổng đăng ký để tiến hành bốc thăm đội hình</small>
+            </div>
+          </div>
+
           <form id="register-form" onsubmit="return false;">
             <div class="form-instruction">
               Hãy khai báo danh tính để ban tổ chức xếp đội hình tham chiến!
@@ -223,6 +381,14 @@
               <span class="btn-secondary-icon" style="margin-right: 6px; font-weight: bold; color: var(--text-gold-main);">☲</span> Xuất Ảnh Trận Đồ
             </button>
           </div>
+
+          <!-- Khu vực admin: Kết thúc / Mở lại đăng ký -->
+          <div class="admin-zone" style="display: flex; justify-content: center; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap;">
+            <button class="btn-secondary btn-utility" id="btn-lock-registration" style="background: linear-gradient(135deg, #8b0000, #5a0000); border-color: #c9302c;">
+              <span class="btn-secondary-icon" style="margin-right: 6px; color: #f4d03f;">🔒</span>
+              <span id="btn-lock-text">Kết Thúc Ghi Danh</span>
+            </button>
+          </div>
           
           <div class="table-container" id="sim-result-wrap" style="max-height: 520px; background: transparent; border: none; box-shadow: none;">
             <div class="empty-list" style="padding: 3rem 1.5rem;">
@@ -241,6 +407,20 @@
       <p class="footer-design">From BunBo With love   &copy; </p>
       <p class="footer-guild">Đồng tổ chức bởi Bang Nhất Mộng & Rising Star</p>
     </footer>
+  </div>
+
+  <!-- Modal nhập code admin -->
+  <div class="admin-modal-backdrop" id="admin-modal-backdrop">
+    <div class="admin-modal">
+      <h3 id="admin-modal-title">🔒 Xác nhận kết thúc ghi danh</h3>
+      <p id="admin-modal-desc">Nhập code quản trị để khóa cổng đăng ký:</p>
+      <input type="password" id="admin-code-input" placeholder="Nhập code admin..." autocomplete="off" />
+      <div class="admin-modal-msg" id="admin-modal-msg"></div>
+      <div class="admin-modal-actions">
+        <button id="admin-modal-cancel">Hủy</button>
+        <button class="btn-confirm" id="admin-modal-confirm">Xác nhận</button>
+      </div>
+    </div>
   </div>
 
   <!-- Script links -->

@@ -1,29 +1,43 @@
 // =============================================================
 // GOOGLE APPS SCRIPT - BACKEND CHO FORM ĐĂNG KÝ GIẢI ĐẤU
-// Bản cập nhật: thêm chức năng lưu kết quả random teams
+// Bản cập nhật: thêm chức năng khóa/mở khóa đăng ký bằng admin code
 // =============================================================
-// Hướng dẫn:
-// 1. Mở Google Sheet hiện có (đang lưu đăng ký)
+// Hướng dẫn cập nhật:
+// 1. Mở Google Sheet hiện có
 // 2. Vào Extensions → Apps Script
 // 3. Xóa code cũ, paste toàn bộ file này vào
-// 4. Click "Deploy" → "Manage deployments" → icon bút chì
-// 5. Chọn Version: "New version" → Deploy
-// 6. URL KHÔNG ĐỔI - không cần update frontend
+// 4. ĐỔI giá trị ADMIN_CODE bên dưới thành code admin của bạn
+// 5. Click Save (Ctrl+S)
+// 6. Click "Deploy" → "Manage deployments" → icon bút chì
+// 7. Chọn Version: "New version" → Deploy
+// 8. URL KHÔNG ĐỔI - frontend không cần update
 // =============================================================
+
+// ⚠️ ĐỔI CODE NÀY THÀNH CODE ADMIN CỦA BẠN (chỉ admin mới biết)
+const ADMIN_CODE = 'bunbo2026';
 
 const SHEET_NAME = 'DangKy';
 const SHEET_RESULTS = 'KetQuaRandom';
+const SHEET_STATE = 'TrangThai'; // sheet lưu trạng thái khóa
 
 function doGet(e) {
   try {
     const action = e.parameter.action;
 
     if (action === 'list') {
-      return jsonResponse({ success: true, items: getAllRegistrations() });
+      return jsonResponse({
+        success: true,
+        items: getAllRegistrations(),
+        locked: isRegistrationLocked()
+      });
     }
 
     if (action === 'list_results') {
       return jsonResponse({ success: true, sessions: getAllResults() });
+    }
+
+    if (action === 'get_state') {
+      return jsonResponse({ success: true, locked: isRegistrationLocked() });
     }
 
     return jsonResponse({ success: true, message: 'API hoạt động bình thường' });
@@ -37,6 +51,10 @@ function doPost(e) {
     const action = e.parameter.action;
 
     if (action === 'register') {
+      // Chặn đăng ký nếu đã khóa
+      if (isRegistrationLocked()) {
+        return jsonResponse({ success: false, error: 'Đã kết thúc thời gian ghi danh' });
+      }
       const result = registerPlayer({
         name: e.parameter.name,
         id: e.parameter.id,
@@ -54,10 +72,74 @@ function doPost(e) {
       return jsonResponse(result);
     }
 
+    if (action === 'lock_registration') {
+      if (e.parameter.code !== ADMIN_CODE) {
+        return jsonResponse({ success: false, error: 'Code admin không đúng' });
+      }
+      setRegistrationLocked(true);
+      return jsonResponse({ success: true, locked: true });
+    }
+
+    if (action === 'unlock_registration') {
+      if (e.parameter.code !== ADMIN_CODE) {
+        return jsonResponse({ success: false, error: 'Code admin không đúng' });
+      }
+      setRegistrationLocked(false);
+      return jsonResponse({ success: true, locked: false });
+    }
+
     return jsonResponse({ success: false, error: 'Action không hợp lệ' });
   } catch (err) {
     return jsonResponse({ success: false, error: err.toString() });
   }
+}
+
+// ====== TRẠNG THÁI KHÓA ======
+function getStateSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_STATE);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_STATE);
+    sheet.getRange('A1').setValue('key');
+    sheet.getRange('B1').setValue('value');
+    sheet.getRange('A2').setValue('registration_locked');
+    sheet.getRange('B2').setValue('false');
+    sheet.getRange(1, 1, 1, 2).setFontWeight('bold').setBackground('#2c1810').setFontColor('#f4d03f');
+  }
+  return sheet;
+}
+
+function isRegistrationLocked() {
+  const sheet = getStateSheet();
+  // Tìm dòng có key = registration_locked
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+  const values = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+  for (let i = 0; i < values.length; i++) {
+    if (values[i][0] === 'registration_locked') {
+      return String(values[i][1]).toLowerCase() === 'true';
+    }
+  }
+  return false;
+}
+
+function setRegistrationLocked(locked) {
+  const sheet = getStateSheet();
+  const lastRow = sheet.getLastRow();
+  const value = locked ? 'true' : 'false';
+
+  // Tìm dòng có key = registration_locked
+  if (lastRow >= 2) {
+    const values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (let i = 0; i < values.length; i++) {
+      if (values[i][0] === 'registration_locked') {
+        sheet.getRange(i + 2, 2).setValue(value);
+        return;
+      }
+    }
+  }
+  // Chưa có thì thêm mới
+  sheet.appendRow(['registration_locked', value]);
 }
 
 // ====== ĐĂNG KÝ ======
@@ -79,7 +161,7 @@ function registerPlayer(data) {
     return { success: false, error: 'Thiếu thông tin' };
   }
 
-  const validHe = ['Tố vấn', 'Thiết y', 'Cửu linh', 'Long ngâm', 'Thần tương', 'Toái mộng', 'Huyết hà'];
+  const validHe = ['Tố vấn', 'Thiết y', 'Cửu linh', 'Long ngâm', 'Thần tương', 'Toái mộng', 'Huyết Hà'];
   if (validHe.indexOf(data.he) === -1) {
     return { success: false, error: 'Hệ phái không hợp lệ' };
   }
@@ -150,7 +232,6 @@ function saveTeamsResult(data) {
   const sheet = getResultsSheet();
   const ts = new Date();
 
-  // Tính lượt random thứ mấy
   const lastRow = sheet.getLastRow();
   let sessionNum = 1;
   if (lastRow > 1) {
@@ -159,10 +240,8 @@ function saveTeamsResult(data) {
     sessionNum = Math.max(...sessionNumbers) + 1;
   }
 
-  // Thêm dải phân cách trước session mới (trừ session đầu tiên)
   const rowsToAdd = [];
 
-  // Ghi từng team
   teams.forEach((team, teamIdx) => {
     team.members.forEach((member, memberIdx) => {
       rowsToAdd.push([
@@ -178,7 +257,6 @@ function saveTeamsResult(data) {
     });
   });
 
-  // Ghi bench (dự bị) nếu có
   if (bench && bench.length > 0) {
     bench.forEach((member, idx) => {
       rowsToAdd.push([
@@ -198,7 +276,6 @@ function saveTeamsResult(data) {
     const startRow = sheet.getLastRow() + 1;
     sheet.getRange(startRow, 1, rowsToAdd.length, 8).setValues(rowsToAdd);
 
-    // Tô màu nhẹ phân biệt session (zebra striping)
     if (sessionNum % 2 === 0) {
       sheet.getRange(startRow, 1, rowsToAdd.length, 8).setBackground('#fdf6e3');
     }
@@ -219,7 +296,6 @@ function getAllResults() {
 
   const values = sheet.getRange(2, 1, lastRow - 1, 8).getValues();
 
-  // Group by session
   const sessions = {};
   values.forEach(row => {
     const sessionNum = row[1];

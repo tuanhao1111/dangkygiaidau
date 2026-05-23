@@ -11,6 +11,7 @@
 
   // === LOCAL PLAYER CACHE ===
   let cachedPlayers = [];
+  let cachedLocked = false; // trạng thái đã kết thúc đăng ký
 
   // === MON PHAI TO CLASS DICTIONARY ===
   const heClass = {
@@ -392,11 +393,80 @@
     return CONFIG && CONFIG.APPS_SCRIPT_URL && !CONFIG.APPS_SCRIPT_URL.includes('REPLACE_WITH');
   }
 
+  // === APPLY LOCK STATE TO UI ===
+  // Khóa form đăng ký + khóa nút random + đổi nút admin sang "Mở lại"
+  function applyLockState(locked) {
+    cachedLocked = !!locked;
+
+    const banner = document.getElementById('lock-banner');
+    const form = document.getElementById('register-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const fName = document.getElementById('f-name');
+    const fId = document.getElementById('f-id');
+    const fHe = document.getElementById('f-he');
+    const fDiscord = document.getElementById('f-discord');
+    const simBtn = document.getElementById('btn-sim-draft');
+    const lockBtn = document.getElementById('btn-lock-registration');
+    const lockBtnText = document.getElementById('btn-lock-text');
+    const lockBtnIcon = lockBtn ? lockBtn.querySelector('.btn-secondary-icon') : null;
+
+    if (locked) {
+      // === KHÓA ĐĂNG KÝ ===
+      if (banner) banner.style.display = 'flex';
+      if (form) form.classList.add('form-locked');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="btn-glow"></span><span class="btn-content">🔒 Đã kết thúc ghi danh</span>`;
+      }
+      [fName, fId, fHe, fDiscord].forEach(el => { if (el) el.disabled = true; });
+
+      // === KHÓA NÚT RANDOM ===
+      if (simBtn) {
+        simBtn.disabled = true;
+        simBtn.innerHTML = `<span class="btn-glow"></span><span class="btn-content">🔒 Đã kết thúc bốc thăm</span>`;
+      }
+
+      // === ĐỔI NÚT ADMIN SANG "MỞ LẠI" ===
+      if (lockBtn) {
+        lockBtn.classList.add('is-unlocked-mode');
+        if (lockBtnText) lockBtnText.textContent = 'Mở Lại Ghi Danh';
+        if (lockBtnIcon) lockBtnIcon.textContent = '🔓';
+      }
+    } else {
+      // === MỞ KHÓA ===
+      if (banner) banner.style.display = 'none';
+      if (form) form.classList.remove('form-locked');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span class="btn-glow"></span><span class="btn-content">Ghi Danh Ngay</span>`;
+      }
+      [fName, fId, fHe, fDiscord].forEach(el => { if (el) el.disabled = false; });
+
+      if (simBtn) {
+        simBtn.disabled = false;
+        simBtn.innerHTML = `<span class="btn-glow"></span><span class="btn-content">☯ Khai Triển Trận Pháp</span>`;
+      }
+
+      if (lockBtn) {
+        lockBtn.classList.remove('is-unlocked-mode');
+        if (lockBtnText) lockBtnText.textContent = 'Kết Thúc Ghi Danh';
+        if (lockBtnIcon) lockBtnIcon.textContent = '🔒';
+      }
+    }
+  }
+
   // === SUBMIT REGISTRATION FORM ===
   if (formEl) {
     formEl.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
+      // Chặn submit nếu đã khóa
+      if (cachedLocked) {
+        WuxiaSound.playClash();
+        setStatus('🔒 Đã kết thúc thời gian ghi danh.', 'error');
+        return;
+      }
+
       const name = document.getElementById('f-name').value.trim();
       const id = document.getElementById('f-id').value.trim();
       const he = document.getElementById('f-he').value;
@@ -441,6 +511,10 @@
         } else {
           WuxiaSound.playClash();
           setStatus('✗ ' + (data.error || 'Có lỗi xảy ra khi ghi danh.'), 'error');
+          // Nếu lỗi do đã khóa, refresh state để khóa UI
+          if (data.error && data.error.indexOf('kết thúc') !== -1) {
+            loadList(true);
+          }
         }
       } catch (e) {
         WuxiaSound.playClash();
@@ -484,6 +558,11 @@
       cachedPlayers = items;
       countEl.textContent = items.length;
       tabCount.textContent = items.length;
+
+      // Áp dụng trạng thái khóa từ backend
+      if (typeof data.locked !== 'undefined') {
+        applyLockState(data.locked);
+      }
 
       // Update faction analytics
       updateFactionAnalytics(items);
@@ -1126,6 +1205,11 @@
     // Click trigger for Drafting
     if (simDraftBtn && simResultWrap) {
       simDraftBtn.addEventListener('click', () => {
+        // Chặn nếu đã kết thúc ghi danh + bốc thăm
+        if (cachedLocked) {
+          return;
+        }
+
         // Lock guard - prevent execution if still locked
         if (isSimulatorLocked()) {
           renderLockState();
@@ -1417,11 +1501,118 @@
     }
   }
 
+  // ============================================================
+  // === ADMIN LOCK/UNLOCK REGISTRATION ===
+  // ============================================================
+  function initAdminLock() {
+    const lockBtn = document.getElementById('btn-lock-registration');
+    const modal = document.getElementById('admin-modal-backdrop');
+    const modalTitle = document.getElementById('admin-modal-title');
+    const modalDesc = document.getElementById('admin-modal-desc');
+    const modalInput = document.getElementById('admin-code-input');
+    const modalMsg = document.getElementById('admin-modal-msg');
+    const modalCancel = document.getElementById('admin-modal-cancel');
+    const modalConfirm = document.getElementById('admin-modal-confirm');
+
+    if (!lockBtn || !modal) return;
+
+    let pendingAction = null; // 'lock' hoặc 'unlock'
+
+    function openModal(action) {
+      pendingAction = action;
+      modalInput.value = '';
+      modalMsg.textContent = '';
+      if (action === 'lock') {
+        modalTitle.textContent = '🔒 Xác nhận kết thúc ghi danh';
+        modalDesc.textContent = 'Sau khi khóa, không ai có thể đăng ký thêm và nút bốc thăm sẽ bị vô hiệu hóa. Nhập code quản trị để xác nhận:';
+        modalConfirm.textContent = 'Khóa Ghi Danh';
+      } else {
+        modalTitle.textContent = '🔓 Mở lại ghi danh';
+        modalDesc.textContent = 'Mở lại cổng đăng ký để người chơi tiếp tục ghi danh. Nhập code quản trị để xác nhận:';
+        modalConfirm.textContent = 'Mở Lại';
+      }
+      modal.classList.add('show');
+      setTimeout(() => modalInput.focus(), 80);
+    }
+
+    function closeModal() {
+      modal.classList.remove('show');
+      pendingAction = null;
+    }
+
+    async function submitCode() {
+      const code = modalInput.value.trim();
+      if (!code) {
+        modalMsg.textContent = 'Vui lòng nhập code admin';
+        return;
+      }
+      if (!isConfigured()) {
+        modalMsg.textContent = 'Chưa cấu hình Apps Script URL';
+        return;
+      }
+
+      modalConfirm.disabled = true;
+      modalMsg.style.color = '#d4b896';
+      modalMsg.textContent = 'Đang xử lý...';
+
+      try {
+        const formData = new FormData();
+        formData.append('action', pendingAction === 'lock' ? 'lock_registration' : 'unlock_registration');
+        formData.append('code', code);
+
+        const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          WuxiaSound.playBell();
+          applyLockState(data.locked);
+          modalMsg.style.color = '#7fdb7f';
+          modalMsg.textContent = data.locked
+            ? '✓ Đã khóa ghi danh thành công'
+            : '✓ Đã mở lại ghi danh';
+          // Reload list để cập nhật mọi nơi
+          loadList(true);
+          setTimeout(closeModal, 900);
+        } else {
+          WuxiaSound.playClash();
+          modalMsg.style.color = '#ff6b6b';
+          modalMsg.textContent = '✗ ' + (data.error || 'Lỗi không xác định');
+        }
+      } catch (err) {
+        modalMsg.style.color = '#ff6b6b';
+        modalMsg.textContent = '✗ Lỗi kết nối: ' + err.message;
+        console.error('Admin lock error:', err);
+      } finally {
+        modalConfirm.disabled = false;
+      }
+    }
+
+    // Click nút khóa/mở khóa → mở modal
+    lockBtn.addEventListener('click', () => {
+      openModal(cachedLocked ? 'unlock' : 'lock');
+    });
+
+    // Modal events
+    modalCancel.addEventListener('click', closeModal);
+    modalConfirm.addEventListener('click', submitCode);
+    modalInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitCode();
+      if (e.key === 'Escape') closeModal();
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
   // === ON LAUNCH INIT ===
   initCardGlow();
   initGoldParticles();
   initBGM();
   initDraftSimulator();
+  initAdminLock();
 
   if (isConfigured()) {
     loadList(true);
